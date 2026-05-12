@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"powershell.cwd": "01. Tebu Jatim",
+		"liveServer.settings.port": 5501
+	}
+}

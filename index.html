@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Tebu Jatim - Kementan</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="assets/Kementan.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet Draw -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <!-- SheetJS for Excel Preview -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+        <p>Loading Spatial Data...</p>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="assets/Kementan.png" alt="Kementan Logo" class="logo">
+            <h1>KEMENTERIAN PERTANIAN<br>REPUBLIK INDONESIA</h1>
+            <p>Sistem Informasi Geografis Tebu Jawa Timur</p>
+        </div>
+
+        <div class="sidebar-content">
+
+
+            <div class="layer-section">
+                <h3><i class="fas fa-layer-group"></i> Manajemen Layer</h3>
+                <div id="layerList" class="layer-list">
+                    <!-- Layers will be dynamically added here -->
+                </div>
+            </div>
+
+            <div class="search-section">
+                <h3><i class="fas fa-search"></i> Pencarian Atribut</h3>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan atribut...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>&copy; 2026 Kementan RI - Dittopad</p>
+        </div>
+    </div>
+
+    <div id="map"></div>
+    
+
+
+    <div class="map-controls">
+        <div class="control-group">
+            <button class="map-btn" id="basemapBtn" title="Pilih Basemap"><i class="fas fa-map"></i></button>
+            <div class="basemap-menu" id="basemapMenu">
+                <div class="basemap-option active" onclick="switchBasemap('esri')">
+                    <img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/512/820" alt="Esri">
+                    <span>Esri Satellite</span>
+                </div>
+                <div class="basemap-option" onclick="switchBasemap('osm')">
+                    <img src="https://a.tile.openstreetmap.org/10/512/820.png" alt="OSM">
+                    <span>OpenStreetMap</span>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <button class="map-btn" id="excelBtn" title="Data Program (XLSX)"><i class="fas fa-file-excel"></i></button>
+            <div class="basemap-menu" id="excelMenu">
+                <div class="menu-header">Data Program XLSX</div>
+                <div class="excel-list">
+                    <div class="excel-option">
+                        <span>Koordinat Program Tebu 2025</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Program Tebu 2025.xlsx', 'Koordinat Program Tebu 2025')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Program Tebu 2025.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>PIC Koordinat Tebu 2025</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/PIC Koordinat Tebu 2025.xlsx', 'PIC Koordinat Tebu 2025')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/PIC Koordinat Tebu 2025.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri BR Tahap 1</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/KEDIRI BR TAHAP 1 (460,943).xlsx', 'Kediri BR Tahap 1')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/KEDIRI BR TAHAP 1 (460,943).xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Malang BR Tahap 1</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Malang BR Tahap 1.xlsx', 'Malang BR Tahap 1')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Malang BR Tahap 1.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Blitar Tahap 1 BR</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/BLITAR TAHAP 1 BR (495,10).xlsx', 'Blitar Tahap 1 BR')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/BLITAR TAHAP 1 BR (495,10).xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Bondowoso BR Tahap I</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/BONDOWOSO BR TAHAP I (48,261).xlsx', 'Bondowoso BR Tahap I')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/BONDOWOSO BR TAHAP I (48,261).xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri BR/PAT Tahap 4</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Kediri BR dan PAT tahap 4.xlsx', 'Kediri BR/PAT Tahap 4')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Kediri BR dan PAT tahap 4.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri BR/PAT Tahap 5</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Kediri BR dan PAT tahap 5.xlsx', 'Kediri BR/PAT Tahap 5')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Kediri BR dan PAT tahap 5.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri BR/PAT Tahap 6</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Kediri BR dan PAT Tahap 6.xlsx', 'Kediri BR/PAT Tahap 6')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Kediri BR dan PAT Tahap 6.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri BR/PAT Tahap 7</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Kediri BR dan PAT Tahap 7.xlsx', 'Kediri BR/PAT Tahap 7')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Kediri BR dan PAT Tahap 7.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri PAT Tahap 1</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Kediri PAT Tahap 1.xlsx', 'Kediri PAT Tahap 1')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Kediri PAT Tahap 1.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Kediri PAT Tahap 2</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Kediri PAT Tahap 2.xlsx', 'Kediri PAT Tahap 2')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Kediri PAT Tahap 2.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Lamongan BR Tahap 1</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Lamongan BR tahap 1.xlsx', 'Lamongan BR Tahap 1')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Lamongan BR tahap 1.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                    <div class="excel-option">
+                        <span>Nganjuk BR Tahap 1</span>
+                        <div class="excel-actions">
+                            <button onclick="previewExcel('Program/Koordinat Nganjuk BR tahap 1.xlsx', 'Nganjuk BR Tahap 1')" title="Preview"><i class="fas fa-eye"></i></button>
+                            <a href="Program/Koordinat Nganjuk BR tahap 1.xlsx" download title="Download"><i class="fas fa-file-arrow-down"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="map-btn" id="locateBtn" title="Posisi Saya" onclick="locateMe()"><i class="fas fa-location-arrow"></i></button>
+        <button class="map-btn" id="homeBtn" title="Zoom Seluruh Indonesia" onclick="goHome()"><i class="fas fa-home"></i></button>
+        <button class="map-btn" id="drawPolygonBtn" title="Gambar Poligon" onclick="startDraw('polygon')"><i class="fas fa-draw-polygon"></i></button>
+        <button class="map-btn" id="drawMarkerBtn" title="Gambar Titik" onclick="startDraw('marker')"><i class="fas fa-map-marker-alt"></i></button>
+        <button class="map-btn" id="saveDrawBtn" title="Simpan Hasil Gambar" onclick="saveDrawnData()" style="display: none; color: #4caf50;"><i class="fas fa-save"></i></button>
+        <button class="map-btn" id="clearDrawBtn" title="Hapus Hasil Gambar" onclick="clearDrawnData()" style="display: none; color: #f44336;"><i class="fas fa-trash-alt"></i></button>
+        <button class="map-btn" id="editDrawBtn" title="Edit Gambar" onclick="toggleEdit()" style="display: none; color: #2196f3;"><i class="fas fa-edit"></i></button>
+    </div>
+
+    <div id="coords-bar" class="coords-bar">
+        <span><i class="fas fa-ruler-horizontal"></i> Skala: <span id="scale-val">1:0</span></span>
+        <span class="separator">|</span>
+        <span><i class="fas fa-location-dot"></i> DMS: <span id="dms-val">0° 0' 0" S, 0° 0' 0" E</span></span>
+        <span class="separator">|</span>
+        <span><i class="fas fa-crosshairs"></i> UTM: <span id="coords-val">0.00000, 0.00000</span></span>
+    </div>
+
+    <!-- Excel Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="previewTitle">Preview Data</h2>
+                <span class="close-modal" onclick="closePreview()">&times;</span>
+            </div>
+            <div id="previewBody" class="modal-body">
+                <div class="preview-placeholder">Memuat data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
